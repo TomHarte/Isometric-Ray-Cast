@@ -168,7 +168,7 @@ triangle_address: dw 0
 ;
 
 org $8440
-triangle_map:	;ds 32*49
+triangle_map:	ds 32*49
 
 ;
 ;	The following is a pre-generated map, which I am temporarily using to test the pixel plotting in isolation.
@@ -531,8 +531,8 @@ cast_even_row:
 	inc l
 	push hl
 
-	; TODO: would it actually be faster to use an index register here?
-
+	; TODO: would it actually be faster to use an index register here, rather
+	; than all this push/pop/inc hl stuff?
 
 	REPT 15, offset
 		ld hl, (cast_location)
@@ -556,6 +556,60 @@ cast_even_row:
 
 	ret
 
+cast_odd_row2:
+	ld bc, (triangle_destination)
+	push bc
+	call cast_odd
+	
+	ex de, hl
+	pop hl
+	ld (hl), d
+	inc l
+	push hl
+	
+	REPT 15, offset
+		ld hl, (cast_location)
+		inc_x
+		dec_y
+		ld (cast_location), hl
+		
+		call cast_odd
+		
+		ex de, hl
+		pop hl
+		ld (hl), e
+		inc l
+		ld (hl), d
+		inc l
+		push hl
+	ENDM
+	
+	ld hl, (cast_location)
+	inc_x
+	dec_y
+	ld (cast_location), hl
+	
+	call cast_odd
+	ex de, hl
+	pop hl
+	ld (hl), e
+	inc l
+	ld (triangle_destination), hl
+
+	ret
+
+cast_odd_row:
+	ld hl, (triangle_destination)
+	ld a, 32
+	add a, l
+	ld l, a
+	ld a, 0
+	adc a, h
+	ld h, a
+	ld (triangle_destination), hl
+
+	ret
+
 cast_map:
 	; Set the triangle destination pointer.
 	ld hl, triangle_map
@@ -563,12 +617,27 @@ cast_map:
 
 	; Seed the current casting location.
 	ld hl, (map_location)
-	ld (cast_location), hl
-	call cast_even_row
+	ld (start_of_row), hl
+
+	; Cast rows
+	REPT 24
+		ld hl, (start_of_row)
+		inc_x
+		ld (start_of_row), hl
+		ld (cast_location), hl
+		call cast_even_row
+
+		ld hl, (start_of_row)
+		inc_y		
+		ld (start_of_row), hl
+		ld (cast_location), hl
+		call cast_odd_row		; TODO: fix cast_odd_row
+	ENDM
 
 	ret
 
 cast_location:			dw 0
+start_of_row:			dw 0
 triangle_destination:	dw 0
 
 ;
@@ -582,10 +651,10 @@ display:
 	call cast_map
 	call draw_tiles
 
-;	ld hl, (map_location)
+	ld hl, (map_location)
 ;	inc_x
-;	dec_y
-;	ld (map_location), hl
+	dec_y
+	ld (map_location), hl
 	
 ;	ld a, (triangle_map+34)
 ;	add a, 0x04
