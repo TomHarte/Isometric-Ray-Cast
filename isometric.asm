@@ -317,19 +317,16 @@ draw_row:
 
 	ret
 
-
 ;
-;	Casts for a single triangle pair, returning the left result in L, the right in H;
-;	in both cases the result generated will be the relevant colour, ANDed with the mask.
+;	Map address manipulation macros.
 ;
-;	Upon entry:
+;	Map addresses are in the form:
 ;
-;		L = x coordinate to cast for.
-;		H = y coordinate to cast for.
+;		11 yyyyyyy xxxxxxx
 ;
-;	Both are in the range [0, 127]
+;	[inc_dec]_[x/y] then increment or decrement the x or y fields,
+;	without altering the others.
 ;
-
 dec_x MACRO
 	rl l
 	dec l
@@ -363,6 +360,18 @@ dec_y MACRO
 	or 0xc0		; 7
 	ld h, a		; 4	= 37
 ENDM
+
+;
+;	Casts for a single triangle pair, returning the left result in L, the right in H;
+;	in both cases the result generated will be the relevant colour, ANDed with the mask.
+;
+;	Upon entry:
+;
+;		L = x coordinate to cast for.
+;		H = y coordinate to cast for.
+;
+;	Both are in the range [0, 127]
+;
 
 cast MACRO mask
 	; Read from (x, y).
@@ -493,18 +502,49 @@ cast_even:
 cast_odd:
 	cast 0x30
 
+;
+;	Current map location in the top left of the display.
+;
+
+map_location:	dw 0
+
+;
+;	Repopulates the entierty of triangle_map based on the current `map_location`.
+;
+
+cast_location:	dw 0
+
+cast_map:
+	; Seed the current casting location.
+	ld hl, (map_location)
+	ld (cast_location), hl
+
+	call cast_even
+	ld (triangle_map), hl
+
+	REPT 15, offset
+		ld hl, (cast_location)
+		inc_x
+		dec_y
+		ld (cast_location), hl
+		call cast_even
+		ld (triangle_map + (offset+1)*2), hl
+	ENDM
+
+	ret
 
 ;
 ;	Main entry point. Just a test loop for now.
 ;
 
 start:
+	call cast_map
 	call draw_tiles
 	
-	ld a, (triangle_map+34)
-	add a, 0x04
-	and 0x0c
-	ld (triangle_map+34), a
+;	ld a, (triangle_map+34)
+;	add a, 0x04
+;	and 0x0c
+;	ld (triangle_map+34), a
 	
 	jr start
 	
