@@ -167,7 +167,7 @@ triangle_address: dw 0
 ;	Should be 32-byte aligned.
 ;
 
-org $8420
+org $8440
 triangle_map:	;ds 32*49
 
 ;
@@ -541,7 +541,7 @@ cast_even_row:
 		ld (cast_location), hl
 
 		call cast_even
-		
+
 		ex de, hl
 		pop hl
 		ld (hl), e
@@ -578,20 +578,21 @@ triangle_destination:	dw 0
 start:
 	di
 
+display:
 	call cast_map
 	call draw_tiles
 
-	ld hl, (map_location)
-	inc_x
-	dec_y
-	ld (map_location), hl
+;	ld hl, (map_location)
+;	inc_x
+;	dec_y
+;	ld (map_location), hl
 	
 ;	ld a, (triangle_map+34)
 ;	add a, 0x04
 ;	and 0x0c
 ;	ld (triangle_map+34), a
 	
-	jr start
+	jr display
 	
 ;	di
 ;	halt
