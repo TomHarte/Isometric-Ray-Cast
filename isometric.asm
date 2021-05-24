@@ -164,9 +164,10 @@ triangle_address: dw 0
 ;	Even lines contain the colour index of [0, 3] shifted up to bits 6 and 7;
 ;	odd lines use bits 3 and 2.
 ;
-;	TODO: would this benefit from any sort of alignment?
+;	Should be 32-byte aligned.
 ;
 
+org $8420
 triangle_map:	;ds 32*49
 
 ;
@@ -333,36 +334,36 @@ draw_row:
 ;	[inc_dec]_[x/y] then increment or decrement the x or y fields,
 ;	without altering the others.
 ;
-dec_x MACRO
+dec_y MACRO
 	rl l
 	dec l
 	dec l
-	rr l		; = 24
-ENDM
-
-inc_x MACRO
-	rl l
-	inc l
-	inc l
 	rr l		; = 24
 ENDM
 
 inc_y MACRO
+	rl l
+	inc l
+	inc l
+	rr l		; = 24
+ENDM
+
+inc_x MACRO
 	ld a, 0x80	; 7
 	add a, l	; 4
 	ld l, a		; 4
-	xor a		; 4
-	add a, h	; 4
+	ld a, 0x00	; 7
+	adc a, h	; 4
 	or 0xc0		; 7
-	ld h, a		; 4	= 34
+	ld h, a		; 4	= 37
 ENDM
 
-dec_y MACRO
+dec_x MACRO
 	ld a, 0x80	; 7
 	add a, l	; 4
 	ld l, a		; 4
 	ld a, 0xff	; 7
-	add a, h	; 4
+	adc a, h	; 4
 	or 0xc0		; 7
 	ld h, a		; 4	= 37
 ENDM
@@ -389,7 +390,6 @@ cast MACRO mask
 
 	; Read from (x-1, y-1).
 	dec_y
-	rr h
 	ld d, (hl)		; i.e. d = 'back'.
 
 	; Read from (x, y-1)
@@ -473,13 +473,13 @@ _not_floor_right:
 	jr nc, _front_lt_right_ge_back
 	
 		; front < right, right < back.
-		ld l, 0xff & mask
+		ld h, 0xff & mask
 		jr _done
 		
 _front_lt_right_ge_back:
 
 		; front < right, right >= back.
-		ld l, 0xaa & mask
+		ld h, 0xaa & mask
 		jr _done
 		
 _front_ge_right:
@@ -488,13 +488,13 @@ _front_ge_right:
 	jr nc, _front_ge_right_and_back
 	
 		; front >= right, front < back.
-		ld l, 0xaa & mask
+		ld h, 0xaa & mask
 		jr _done
 		
 _front_ge_right_and_back:
 
 		; front >= right, front >= back.
-		ld l, 0x55 & mask
+		ld h, 0x55 & mask
 
 _done:
 	ret
@@ -506,46 +506,85 @@ cast_even:
 	cast 0xc0
 	
 cast_odd:
-	cast 0x30
+	cast 0x0c
 
 ;
 ;	Current map location in the top left of the display.
 ;
 
-map_location:	dw 0
+map_location:	dw 0xc0ff
 
 ;
 ;	Repopulates the entierty of triangle_map based on the current `map_location`.
 ;
 
-cast_location:	dw 0
-
-cast_map:
-	; Seed the current casting location.
-	ld hl, (map_location)
-	ld (cast_location), hl
-
+cast_even_row:
+	ld bc, (triangle_destination)
+	push bc
 	call cast_even
-	ld (triangle_map), hl
+
+	ex de, hl
+	pop hl
+	ld (hl), e
+	inc l
+	ld (hl), d
+	inc l
+	push hl
+
+	; TODO: would it actually be faster to use an index register here?
+
 
 	REPT 15, offset
 		ld hl, (cast_location)
 		inc_x
 		dec_y
 		ld (cast_location), hl
+
 		call cast_even
-		ld (triangle_map + (offset+1)*2), hl
+		
+		ex de, hl
+		pop hl
+		ld (hl), e
+		inc l
+		ld (hl), d
+		inc l
+		push hl
 	ENDM
 
+	pop hl
+	ld (triangle_destination), hl
+
 	ret
+
+cast_map:
+	; Set the triangle destination pointer.
+	ld hl, triangle_map
+	ld (triangle_destination), hl
+
+	; Seed the current casting location.
+	ld hl, (map_location)
+	ld (cast_location), hl
+	call cast_even_row
+
+	ret
+
+cast_location:			dw 0
+triangle_destination:	dw 0
 
 ;
 ;	Main entry point. Just a test loop for now.
 ;
 
 start:
+	di
+
 	call cast_map
 	call draw_tiles
+
+	ld hl, (map_location)
+	inc_x
+	dec_y
+	ld (map_location), hl
 	
 ;	ld a, (triangle_map+34)
 ;	add a, 0x04
@@ -563,7 +602,7 @@ start:
 ;	A table that maps from x to the value of the highest bit in x.
 ;
 
-	org $df00
+	org $bf00
 highest_bit_table:
 	db 0, 1, 2, 2, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128
 
