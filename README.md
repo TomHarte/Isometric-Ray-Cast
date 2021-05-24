@@ -65,7 +65,9 @@ I'm going to swizzle that: the cube at (x, y, z) is now represented by bit z at 
 		}
 	}
 
-... and then the corresponding equivalent to pick right_colour with `front`, `back` and `right`.
+... and then the corresponding equivalent to pick right_colour with `front`, `back` and `right`. That's with `highest` being a function that returns an int with only the highest bit still set. Or returns the number of the highest bit set. Either way. Anything that allows those `>=`s to do the comparison of "which of these has the highest bit set?".
+
+(Aside: you could flip bit order and test for lowest, with the advantage that `x & ~x+1` does the job of `lowest`, but that's still not as fast as a small lookup table so it's slightly academic for now.)
 
 Results from that are stored in a 32x49 array, from which values are then picked in threes to select 8x8 graphics tiles which are copied to the display.
 
