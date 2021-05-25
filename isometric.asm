@@ -174,6 +174,8 @@ triangle_map:	ds 32*49
 ;	Outputs the current state of the triangle map, in full.
 ;
 
+num_rows equ 24
+
 draw_tiles:
 	ld hl, triangle_map-1
 	ld (triangle_address), hl	; Seed pointer into triangle map.
@@ -181,7 +183,7 @@ draw_tiles:
 	ld bc, 32					; Offset of next triangle line from current;
 								; possibly a waste of registers (?)
 
-	ld d, 24					; Line counter: there'll be 24 of them.
+	ld d, num_rows				; Row counter: there'll be `num_rows` of them.
 
 draw_row:
 	;
@@ -552,7 +554,7 @@ cast_map:
 	ld (start_of_row), hl
 
 	; Cast rows
-	REPT 24, index
+	REPT num_rows, index
 	_l1:
 		IF index && !(index & 3)
 			ld a, (triangle_destination+1)
@@ -574,9 +576,11 @@ cast_map:
 
 	ENDM
 
-	ld a, (triangle_destination+1)
-	inc a
-	ld (triangle_destination+1), a
+	IF !(num_rows & 3)
+		ld a, (triangle_destination+1)
+		inc a
+		ld (triangle_destination+1), a
+	ENDIF
 
 	ld hl, (start_of_row)
 	inc_x
@@ -602,11 +606,40 @@ display:
 	call cast_map
 	call draw_tiles
 
+	; Read keyboard to scroll.
 	ld hl, (map_location)
-;	inc_x
+
+	ld bc, 0xfbfe
+	in a, (c)
+	rra
+	jr c, _no_q
 	dec_y
-	ld (map_location), hl
+
+_no_q:
+	ld bc, 0xfdfe
+	in a, (c)
+	rra
+	jr c, _no_a
+	inc_y
 	
+_no_a:
+	ld bc, 0xdffe
+	in a, (c)
+	rra
+	jr c, _no_p
+	inc_x
+	
+_no_p:
+	ld bc, 0xdffe
+	in a, (c)
+	rra
+	rra
+	jr c, _no_o
+	dec_x
+
+_no_o:
+
+	ld (map_location), hl	
 	jr display
 
 ;
