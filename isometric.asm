@@ -608,6 +608,13 @@ cast_map:
 
 	; Cast rows
 	REPT 24, index
+	_l1:
+		IF index && !(index & 3)
+			ld a, (triangle_destination+1)
+			inc a
+			ld (triangle_destination+1), a
+		ENDIF
+
 		ld hl, (start_of_row)
 		inc_x
 		ld (start_of_row), hl
@@ -620,12 +627,11 @@ cast_map:
 		ld (cast_location), hl
 		call cast_odd_row
 
-		IF index && !(index & 3)
-			ld a, (triangle_destination+1)
-			inc a
-			ld (triangle_destination+1), a
-		ENDIF
 	ENDM
+
+	ld a, (triangle_destination+1)
+	inc a
+	ld (triangle_destination+1), a
 
 	ld hl, (start_of_row)
 	inc_x
