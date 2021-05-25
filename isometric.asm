@@ -170,6 +170,8 @@ triangle_address: dw 0
 org $8500
 triangle_map:	ds 32*49
 
+output_map: ds 32*24, 1
+
 ;
 ;	Outputs the current state of the triangle map, in full.
 ;
@@ -184,6 +186,9 @@ draw_tiles:
 								; possibly a waste of registers (?)
 
 	ld d, num_rows				; Row counter: there'll be `num_rows` of them.
+
+	ld ix, output_map			; Load a pointer to the buffer of tiles drawn last time.
+								; TODO: can I do better than using IX?
 
 draw_row:
 	;
@@ -222,9 +227,19 @@ draw_row:
 			add hl, bc
 			or (hl)
 			
-			; TODO: some sort of comparison with the last thing plotted to the display here?
-			
+			; Compare with previously-output tile and skip if possible.
+			cp (ix+0)
+			jr nz, _draw
+
+			inc ix
 			exx
+			inc e
+			jr _next
+	
+		_draw:
+			exx
+				ld (ix+0), a
+				inc ix
 
 				; Map that to a tile address and copy a tile.
 				ld h, (tiles + flip*512) >> 9					; TODO: could use BC' to store the two top pointers and save three cycles here?
@@ -249,12 +264,13 @@ draw_row:
 				ld d, a
 				inc e
 
+		_next:
 			exx
 		ENDM
 
 		; Continue column loop. E is valid from 32 to 1.
 		dec e
-		jr nz, draw_tile
+		jp nz, draw_tile
 
 	;
 	;	Add 32 to triangle_address; it gained 32 in the loop above,
