@@ -627,6 +627,6 @@ highest_bit_table:
 	org $c000
 	
 map:
-	INCBIN "map.dat"
+	INCBIN "mapswizzle.dat"
 
 end start	; stop generating code, use 'start' as the entry-point
