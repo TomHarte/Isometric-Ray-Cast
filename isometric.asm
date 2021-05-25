@@ -460,7 +460,7 @@ _pick_right:
 	
 		; If here: front = right = back = 0, i.e. the floor plane was hit
 		ld h, 0x00 & mask
-		jr _done
+		ret
 		
 _not_floor_right:
 	ld a, b
@@ -474,13 +474,13 @@ _not_floor_right:
 	
 		; front < right, right < back.
 		ld h, 0xff & mask
-		jr _done
+		ret
 		
 _front_lt_right_ge_back:
 
 		; front < right, right >= back.
 		ld h, 0xaa & mask
-		jr _done
+		ret
 		
 _front_ge_right:
 	ld a, b
@@ -489,15 +489,13 @@ _front_ge_right:
 	
 		; front >= right, front < back.
 		ld h, 0xaa & mask
-		jr _done
+		ret
 		
 _front_ge_right_and_back:
 
 		; front >= right, front >= back.
 		ld h, 0x55 & mask
-
-_done:
-	ret
+		ret
 
 ENDM
 
@@ -609,7 +607,7 @@ cast_map:
 	ld (start_of_row), hl
 
 	; Cast rows
-	REPT 48, index
+	REPT 24, index
 		ld hl, (start_of_row)
 		inc_x
 		ld (start_of_row), hl
@@ -620,9 +618,9 @@ cast_map:
 		inc_y
 		ld (start_of_row), hl
 		ld (cast_location), hl
-		call cast_odd_row		; TODO: fix cast_odd_row
+		call cast_odd_row
 
-		IF !(index & 7)
+		IF index && !(index & 3)
 			ld a, (triangle_destination+1)
 			inc a
 			ld (triangle_destination+1), a
@@ -654,21 +652,11 @@ display:
 	call draw_tiles
 
 	ld hl, (map_location)
-;	inc_x
-	dec_y
+	inc_x
+;	dec_y
 	ld (map_location), hl
 	
-;	ld a, (triangle_map+34)
-;	add a, 0x04
-;	and 0x0c
-;	ld (triangle_map+34), a
-	
 	jr display
-	
-;	di
-;	halt
-
-	ret
 
 ;
 ;	A table that maps from x to the value of the highest bit in x.
