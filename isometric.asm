@@ -371,11 +371,11 @@ _not_floor_left:
 	ld a, c
 	cp d					; Compare left sub back.
 	jr nc, _front_lt_left_ge_back
-	
+
 		; front < left, left < back.
 		ld l, 0xaa & mask
 		jr _pick_right
-	
+
 _front_lt_left_ge_back:
 
 		; front < left, left >= back.
@@ -384,7 +384,7 @@ _front_lt_left_ge_back:
 
 _front_ge_left:
 	ld a, b
-	cp d
+	cp d					; Compare front sub back.
 	jr nc, _front_ge_left_and_back
 	
 		; front >= left, front < back.
@@ -429,11 +429,11 @@ _front_lt_right_ge_back:
 		
 _front_ge_right:
 	ld a, b
-	cp d
+	cp d					; Compare front sub back.
 	jr nc, _front_ge_right_and_back
 	
 		; front >= right, front < back.
-		ld h, 0xaa & mask
+		ld h, 0xff & mask
 		ret
 		
 _front_ge_right_and_back:
