@@ -74,3 +74,9 @@ Results from that are stored in a 32x49 array, from which values are then picked
 # Work in progress
 
 At the time of writing this README, the Z80 code is not yet fully implemented. Use this repository to follow along.
+
+The objective is output like:
+
+![Sample ouutput](READMEImages/objective.png)
+
+At the time of writing 2d output works and is what produced the image above. Casting is implemented but currently broken.
