@@ -176,7 +176,7 @@ output_map: ds 32*24, 1
 ;	Outputs the current state of the triangle map, in full.
 ;
 
-num_rows equ 24
+num_rows equ 14
 
 draw_tiles:
 	ld hl, triangle_map-1
@@ -676,6 +676,6 @@ highest_bit_table:
 	org $c000
 	
 map:
-	INCBIN "mapswizzle.dat"
+	INCBIN "res/mapswizzle.dat"
 
 end start	; stop generating code, use 'start' as the entry-point
