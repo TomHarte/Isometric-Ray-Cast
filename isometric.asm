@@ -167,7 +167,7 @@ triangle_address: dw 0
 ;	Should be 32-byte aligned.
 ;
 
-org $8440
+org $8500
 triangle_map:	ds 32*49
 
 ;
@@ -556,7 +556,7 @@ cast_even_row:
 
 	ret
 
-cast_odd_row2:
+cast_odd_row:
 	ld bc, (triangle_destination)
 	push bc
 	call cast_odd
@@ -598,17 +598,6 @@ cast_odd_row2:
 
 	ret
 
-cast_odd_row:
-	ld hl, (triangle_destination)
-	ld a, 32
-	add a, l
-	ld l, a
-	ld a, 0
-	adc a, h
-	ld h, a
-	ld (triangle_destination), hl
-
-	ret
 
 cast_map:
 	; Set the triangle destination pointer.
@@ -620,7 +609,7 @@ cast_map:
 	ld (start_of_row), hl
 
 	; Cast rows
-	REPT 24
+	REPT 48, index
 		ld hl, (start_of_row)
 		inc_x
 		ld (start_of_row), hl
@@ -628,11 +617,23 @@ cast_map:
 		call cast_even_row
 
 		ld hl, (start_of_row)
-		inc_y		
+		inc_y
 		ld (start_of_row), hl
 		ld (cast_location), hl
 		call cast_odd_row		; TODO: fix cast_odd_row
+
+		IF !(index & 7)
+			ld a, (triangle_destination+1)
+			inc a
+			ld (triangle_destination+1), a
+		ENDIF
 	ENDM
+
+	ld hl, (start_of_row)
+	inc_x
+	ld (start_of_row), hl
+	ld (cast_location), hl
+	call cast_even_row
 
 	ret
 
@@ -646,6 +647,7 @@ triangle_destination:	dw 0
 
 start:
 	di
+	ld sp, highest_bit_table
 
 display:
 	call cast_map
