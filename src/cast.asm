@@ -134,12 +134,8 @@ _front_ge_right_and_back:
 
 ENDM
 
-
-cast_even:
-	cast 0xc0
-	
-cast_odd:
-	cast 0x0c
+cast_even:	cast 0xc0
+cast_odd:	cast 0x0c
 
 ;
 ;	Current map location in the top left of the display.
@@ -148,7 +144,10 @@ cast_odd:
 map_location:	dw 0xc0ff
 
 ;
-;	Repopulates the entierty of triangle_map based on the current `map_location`.
+;	Casts an even row of tiles, i.e. one containing 16 complete diamonds.
+;	So, an even row looks like:
+;
+;	<><><><><><><><><><><><><><><><>
 ;
 
 cast_even_row:
@@ -188,6 +187,13 @@ cast_even_row:
 	ld (triangle_destination), hl
 
 	ret
+
+;
+;	Casts an odd row of tiles, i.e. one containing 15 complete diamonds
+;	and two halves. So, an odd row looks like:
+;
+;	><><><><><><><><><><><><><><><><
+;
 
 cast_odd_row:
 	ld bc, (triangle_destination)
@@ -231,6 +237,9 @@ cast_odd_row:
 
 	ret
 
+;
+;	Repopulates the entierty of triangle_map based on the current `map_location`.
+;
 
 cast_map:
 	; Set the triangle destination pointer.
