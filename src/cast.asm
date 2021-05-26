@@ -59,17 +59,17 @@ cast MACRO mask
 	; Read from (x, y).
 	ld b, (hl)		; i.e. b = 'front'.
 	
-	; Read from (x-1, y).
-	dec_x
-	ld c, (hl)		; i.e. c = 'left'.
+	; Read from (x, y-1)
+	dec_y
+	ld e, (hl)		; i.e. e = 'right'.
 
 	; Read from (x-1, y-1).
-	dec_y
+	dec_x
 	ld d, (hl)		; i.e. d = 'back'.
 
-	; Read from (x, y-1)
-	inc_x
-	ld e, (hl)		; i.e. e = 'right'.
+	; Read from (x-1, y).
+	inc_y
+	ld c, (hl)		; i.e. c = 'left'.
 
 	; Reduce all to highest bis.
 	ld h, highest_bit_table >> 8
