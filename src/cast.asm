@@ -269,9 +269,8 @@ cast_map:
 	ld hl, (map_location)
 	ld (start_of_row), hl
 
-	; Cast rows
+	; Cast the first 2n rows.
 	REPT num_rows, index
-	_l1:
 		ld hl, (start_of_row)
 		inc_x
 		ld (start_of_row), hl
@@ -283,9 +282,9 @@ cast_map:
 		ld (start_of_row), hl
 		ld (cast_location), hl
 		call cast_odd_row
-
 	ENDM
 
+	; Cast an additional row; an odd number is required.
 	ld hl, (start_of_row)
 	inc_x
 	ld (start_of_row), hl
