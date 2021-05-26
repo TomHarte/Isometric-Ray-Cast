@@ -36,7 +36,7 @@ output_map: 	ds 32*24, 1
 
 draw_tiles:
 	ld hl, triangle_map-1
-	ld (triangle_address), hl	; Seed pointer into triangle map.
+	push hl						; Seed pointer into triangle map.
 
 	ld bc, 32					; Offset of next triangle line from current;
 								; possibly a waste of registers (?)
@@ -60,18 +60,28 @@ draw_row:
 		inc l
 		ld d, (hl)
 
+		; Quick workaround for a limitation in Pasmo syntax:
+		; the brackets around (tiles >> 1) can't be distinguished
+		; from ordinary Z80 indirection brackets if used directly
+		; in the ld below.
 		_bcpair equ (tiles >> 1) + ((tiles >> 9) + 1)
 		ld bc, _bcpair
 	exx
 
-		ld e, 16
-		draw_tile:
+	;
+	; Cost of unrolling here is a bit more than 2kb;
+	; the saving is 5,544 cycles. Consider worth.
+	;
+
+;		ld e, 16
+;		draw_tile:
+	REPT 16
 
 		REPT 2, flip
 			; Get and increment the base triangle address.
-			ld hl, (triangle_address)
+			pop hl
 			inc hl
-			ld (triangle_address), hl
+			push hl
 
 			; Assemble tile index in a.
 			ld a, (hl)
@@ -102,10 +112,10 @@ draw_row:
 				inc ix
 
 				; Map that to a tile address and copy a tile.
-				IF !flip
+				IF !(flip & 1)
 					ld h, b
 				ENDIF
-				IF flip
+				IF (flip & 1)
 					ld h, c
 				ENDIF
 
@@ -134,20 +144,22 @@ draw_row:
 		ENDM
 
 		; Continue column loop. E is valid from 32 to 1.
-		dec e
-		jp nz, draw_tile
+;		dec e
+;		jp nz, draw_tile
+	ENDM
 
 	;
 	;	Add 32 to triangle_address; it gained 32 in the loop above,
 	;	so this additional 32 means that the next line drawn will start
 	;	two lines further down in the triangle buffer.
 	;
-	ld hl, (triangle_address)
+	pop hl
 	add hl, bc
-	ld (triangle_address), hl
+	push hl
 
 	; Continue row loop. D is valid from 24 to 1.
 	dec d
 	jp nz, draw_row
 
+	pop hl
 	ret
