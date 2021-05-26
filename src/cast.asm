@@ -258,7 +258,7 @@ cast_odd_row:
 	ret
 
 ;
-;	Repopulates the entierty of triangle_map based on the current `map_location`.
+;	Repopulates the entirety of triangle_map based on the current `map_location`.
 ;
 
 cast_map:
