@@ -200,8 +200,7 @@ cast_even_row:
 	REPT 15, offset
 		; Advance to the right.
 		ld hl, (cast_location)
-		inc_x
-		dec_y
+		inc_x_dec_y
 		ld (cast_location), hl
 
 		; Cast and store.
@@ -232,8 +231,7 @@ cast_odd_row:
 	REPT 15, offset
 		; Advance to the right.
 		ld hl, (cast_location)
-		inc_x
-		dec_y
+		inc_x_dec_y
 		ld (cast_location), hl
 
 		; Cast and store.
@@ -245,8 +243,7 @@ cast_odd_row:
 	; Advance once more, and populate the single
 	; triangle on the right.
 	ld hl, (cast_location)
-	inc_x
-	dec_y
+	inc_x_dec_y
 	ld (cast_location), hl
 	
 	call cast_odd

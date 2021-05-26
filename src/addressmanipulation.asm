@@ -44,3 +44,16 @@ dec_x MACRO
 	or 0xc0		; 7
 	ld h, a		; 4	= 37
 ENDM
+
+inc_x_dec_y MACRO
+	add hl, hl	; 11
+	dec l		; 4
+	dec l		; 4
+	ld a, h		; 4
+	inc a		; 4
+	or 0x80		; 7
+	ld h, a		; 4
+	sra h		; 8
+	rr l		; 8 = 54
+ENDM
+
