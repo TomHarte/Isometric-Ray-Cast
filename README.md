@@ -4,6 +4,10 @@ A demo of zero-overdraw isometric drawing for the ZX Spectrum based on the Ant A
 
 ![Sample scrolling](READMEImages/isoscroll.gif)
 
+# Build Requirements
+
+This project is built with [Pasmo](https://github.com/spec-chum/pasmo), an assembler that can directly write ZX Spectrum-style .TAP files. Also in this repository are a small number of C or C++ programs that I used to generate data ahead of time. These are not part of the live build process; their output has already been captured. Nevertheless they should build with any standard C or C++ compiler.
+
 # History
 
 In May 2021 I made the public observation that the map of the ZX Spectrum game, Ant Attack, permits a special case of isometric drawing in which the drawer merely selects which colour to apply to every triangle in a pattern like:
