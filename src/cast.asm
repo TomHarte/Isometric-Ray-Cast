@@ -191,20 +191,11 @@ map_location:	dw 0xc0ff
 ;
 
 cast_even_row:
-	ld bc, (triangle_destination)
-	push bc
+	ld ix, (triangle_destination)
 	call cast_even
 
-	ex de, hl
-	pop hl
-	ld (hl), e
-	inc l
-	ld (hl), d
-	inc l
-	push hl
-
-	; TODO: would it actually be faster to use an index register here, rather
-	; than all this push/pop/inc hl stuff?
+	ld (ix+0), l
+	ld (ix+1), h
 
 	REPT 15, offset
 		ld hl, (cast_location)
@@ -213,18 +204,13 @@ cast_even_row:
 		ld (cast_location), hl
 
 		call cast_even
-
-		ex de, hl
-		pop hl
-		ld (hl), e
-		inc l
-		ld (hl), d
-		inc l
-		push hl
+		ld (ix+(offset*2)+2), l
+		ld (ix+(offset*2)+3), h
 	ENDM
 
-	pop hl
-	ld (triangle_destination), hl
+	ld de, 32
+	add ix, de
+	ld (triangle_destination), ix
 
 	ret
 
@@ -236,15 +222,9 @@ cast_even_row:
 ;
 
 cast_odd_row:
-	ld bc, (triangle_destination)
-	push bc
+	ld ix, (triangle_destination)
 	call cast_odd
-	
-	ex de, hl
-	pop hl
-	ld (hl), d
-	inc l
-	push hl
+	ld (ix+0), h
 	
 	REPT 15, offset
 		ld hl, (cast_location)
@@ -253,14 +233,8 @@ cast_odd_row:
 		ld (cast_location), hl
 		
 		call cast_odd
-		
-		ex de, hl
-		pop hl
-		ld (hl), e
-		inc l
-		ld (hl), d
-		inc l
-		push hl
+		ld (ix+(offset*2)+1), l
+		ld (ix+(offset*2)+2), h
 	ENDM
 	
 	ld hl, (cast_location)
@@ -269,11 +243,11 @@ cast_odd_row:
 	ld (cast_location), hl
 	
 	call cast_odd
-	ex de, hl
-	pop hl
-	ld (hl), e
-	inc l
-	ld (triangle_destination), hl
+	ld (ix+31), l
+
+	ld de, 32
+	add ix, de
+	ld (triangle_destination), ix
 
 	ret
 
@@ -293,12 +267,6 @@ cast_map:
 	; Cast rows
 	REPT num_rows, index
 	_l1:
-		IF index && !(index & 3)
-			ld a, (triangle_destination+1)
-			inc a
-			ld (triangle_destination+1), a
-		ENDIF
-
 		ld hl, (start_of_row)
 		inc_x
 		ld (start_of_row), hl
@@ -312,12 +280,6 @@ cast_map:
 		call cast_odd_row
 
 	ENDM
-
-	IF !(num_rows & 3)
-		ld a, (triangle_destination+1)
-		inc a
-		ld (triangle_destination+1), a
-	ENDIF
 
 	ld hl, (start_of_row)
 	inc_x
