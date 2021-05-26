@@ -191,9 +191,7 @@ map_location:	dw 0xc0ff
 ;
 
 cast_even_row:
-	ld ix, (triangle_destination)
 	call cast_even
-
 	ld (ix+0), l
 	ld (ix+1), h
 
@@ -210,7 +208,6 @@ cast_even_row:
 
 	ld de, 32
 	add ix, de
-	ld (triangle_destination), ix
 
 	ret
 
@@ -222,7 +219,6 @@ cast_even_row:
 ;
 
 cast_odd_row:
-	ld ix, (triangle_destination)
 	call cast_odd
 	ld (ix+0), h
 	
@@ -247,7 +243,6 @@ cast_odd_row:
 
 	ld de, 32
 	add ix, de
-	ld (triangle_destination), ix
 
 	ret
 
@@ -257,8 +252,7 @@ cast_odd_row:
 
 cast_map:
 	; Set the triangle destination pointer.
-	ld hl, triangle_map
-	ld (triangle_destination), hl
+	ld ix, triangle_map
 
 	; Seed the current casting location.
 	ld hl, (map_location)
@@ -291,4 +285,3 @@ cast_map:
 
 cast_location:			dw 0
 start_of_row:			dw 0
-triangle_destination:	dw 0
