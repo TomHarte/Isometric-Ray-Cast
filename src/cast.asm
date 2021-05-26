@@ -5,11 +5,15 @@
 ;
 ;	Upon entry:
 ;
-;		L = x coordinate to cast for.
-;		H = y coordinate to cast for.
+;		HL = the map address to cast for.
 ;
 ;	Both are in the range [0, 127]
 ;
+
+floorcolour	equ	0x00	; i.e. colour 0
+cubetop		equ 0x55	; i.e. colour 1
+leftwall	equ 0xaa	; i.e. colour 2
+rightwall	equ	0xff	; i.e. colour 3
 
 cast MACRO mask
 	; Read from (x, y).
@@ -45,7 +49,7 @@ cast MACRO mask
 	jr nz, _not_floor_left
 
 		; If here: front = left = back = 0, i.e. the floor plane was hit
-		ld l, 0x00 & mask
+		ld l, floorcolour & mask
 		jr _pick_right
 
 _not_floor_left:
@@ -59,13 +63,13 @@ _not_floor_left:
 	jr nc, _front_lt_left_ge_back
 
 		; front < left, left < back.
-		ld l, 0xaa & mask
+		ld l, leftwall & mask
 		jr _pick_right
 
 _front_lt_left_ge_back:
 
 		; front < left, left >= back.
-		ld l, 0xff & mask
+		ld l, rightwall & mask
 		jr _pick_right
 
 _front_ge_left:
@@ -74,13 +78,13 @@ _front_ge_left:
 	jr nc, _front_ge_left_and_back
 	
 		; front >= left, front < back.
-		ld l, 0xaa & mask
+		ld l, leftwall & mask
 		jr _pick_right
 	
 _front_ge_left_and_back:
 
 		; front >= left, front >= back.
-		ld l, 0x55 & mask
+		ld l, cubetop & mask
 
 _pick_right:
 	; Test for floor.
@@ -90,7 +94,7 @@ _pick_right:
 	jr nz, _not_floor_right
 	
 		; If here: front = right = back = 0, i.e. the floor plane was hit
-		ld h, 0x00 & mask
+		ld h, floorcolour & mask
 		ret
 		
 _not_floor_right:
@@ -104,13 +108,13 @@ _not_floor_right:
 	jr nc, _front_lt_right_ge_back
 	
 		; front < right, right < back.
-		ld h, 0xff & mask
+		ld h, rightwall & mask
 		ret
 		
 _front_lt_right_ge_back:
 
 		; front < right, right >= back.
-		ld h, 0xaa & mask
+		ld h, leftwall & mask
 		ret
 		
 _front_ge_right:
@@ -119,13 +123,13 @@ _front_ge_right:
 	jr nc, _front_ge_right_and_back
 	
 		; front >= right, front < back.
-		ld h, 0xff & mask
+		ld h, rightwall & mask
 		ret
 		
 _front_ge_right_and_back:
 
 		; front >= right, front >= back.
-		ld h, 0x55 & mask
+		ld h, cubetop & mask
 		ret
 
 ENDM
