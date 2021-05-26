@@ -95,7 +95,7 @@ draw_row:
 			inc ix
 			exx
 			inc e
-			jr _next
+			jp _next
 	
 		_draw:
 			exx

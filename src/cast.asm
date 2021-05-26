@@ -90,7 +90,7 @@ cast MACRO mask
 
 		; If here: front = left = back = 0, i.e. the floor plane was hit
 		ld l, floorcolour & mask
-		jr _pick_right
+		jp _pick_right
 
 _not_floor_left:
 	ld a, b
@@ -104,13 +104,13 @@ _not_floor_left:
 
 		; front < left, left < back.
 		ld l, leftwall & mask
-		jr _pick_right
+		jp _pick_right
 
 _front_lt_left_ge_back:
 
 		; front < left, left >= back.
 		ld l, rightwall & mask
-		jr _pick_right
+		jp _pick_right
 
 _front_ge_left:
 	ld a, b
@@ -119,7 +119,7 @@ _front_ge_left:
 	
 		; front >= left, front < back.
 		ld l, leftwall & mask
-		jr _pick_right
+		jp _pick_right
 	
 _front_ge_left_and_back:
 
@@ -290,9 +290,7 @@ cast_map:
 	inc_x
 	ld (start_of_row), hl
 	ld (cast_location), hl
-	call cast_even_row
-
-	ret
+	jp cast_even_row			; i.e. call cast_even_row; ret
 
 cast_location:			dw 0
 start_of_row:			dw 0

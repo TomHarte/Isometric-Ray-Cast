@@ -56,7 +56,7 @@ _no_p:
 _no_o:
 
 	ld (map_location), hl	
-	jr display
+	jp display
 
 ;
 ;	A table that maps from x to the value of the highest bit in x.
