@@ -18,10 +18,9 @@ triangle_address: dw 0
 ;	Even lines contain the colour index of [0, 3] shifted up to bits 6 and 7;
 ;	odd lines use bits 3 and 2.
 ;
-;	Should be 256-byte aligned.
+;	Currently no alignment requirement; cf. the use of (IX+n) in cast.asm.
 ;
 
-org $8500
 triangle_map:	ds 32*49
 
 ;
