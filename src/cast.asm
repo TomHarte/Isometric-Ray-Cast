@@ -192,6 +192,7 @@ map_location:	dw 0xc0ff
 
 cast_even_row:
 	; Fill the first diamond.
+	push hl
 	call cast_even
 	ld (ix+0), l
 	ld (ix+1), h
@@ -199,9 +200,12 @@ cast_even_row:
 	; Fill all the other diamonds.
 	REPT 15, offset
 		; Advance to the right.
-		ld hl, (cast_location)
+		pop hl
 		inc_x_dec_y
-		ld (cast_location), hl
+
+		IF offset != 14
+			push hl
+		ENDIF
 
 		; Cast and store.
 		call cast_even
@@ -224,15 +228,16 @@ cast_even_row:
 
 cast_odd_row:
 	; Fill the single triangle on the left.
+	push hl
 	call cast_odd
 	ld (ix+0), h
 
 	; Fill all the intermediate diamonds.
 	REPT 15, offset
 		; Advance to the right.
-		ld hl, (cast_location)
+		pop hl
 		inc_x_dec_y
-		ld (cast_location), hl
+		push hl
 
 		; Cast and store.
 		call cast_odd
@@ -242,9 +247,8 @@ cast_odd_row:
 
 	; Advance once more, and populate the single
 	; triangle on the right.
-	ld hl, (cast_location)
+	pop hl
 	inc_x_dec_y
-	ld (cast_location), hl
 	
 	call cast_odd
 	ld (ix+31), l
@@ -271,13 +275,11 @@ cast_map:
 		ld hl, (start_of_row)
 		inc_x
 		ld (start_of_row), hl
-		ld (cast_location), hl
 		call cast_even_row
 
 		ld hl, (start_of_row)
 		inc_y
 		ld (start_of_row), hl
-		ld (cast_location), hl
 		call cast_odd_row
 	ENDM
 
@@ -285,8 +287,6 @@ cast_map:
 	ld hl, (start_of_row)
 	inc_x
 	ld (start_of_row), hl
-	ld (cast_location), hl
 	jp cast_even_row			; i.e. call cast_even_row; ret
 
-cast_location:			dw 0
 start_of_row:			dw 0
