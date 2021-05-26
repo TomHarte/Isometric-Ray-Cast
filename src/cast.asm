@@ -9,6 +9,46 @@
 ;
 ;	Both are in the range [0, 127]
 ;
+;
+;	In this diagram:
+;
+;		      /\
+;		     /  \
+;		    / B  \
+;		   /\    /\			B = back
+;		  /  \  /  \		L = left
+;		 / L  \/  R \		R = right
+;		|\    /\    /|		F = front
+;		| \  /  \  / |
+;		|  \/ F  \/  |
+;		\  |\    /|  /
+;		 \ | \  / | /
+;		  \|  \/  |/
+;		   \  |   /
+;		    \ |  /
+;		     \| /
+;		      \/
+;
+;	The objective is to pick the proper colour for the left and right
+;	halves of the front cube.
+;
+;	The test is then pretty simple: if the F cube is present, both colours
+;	will be that of the top of the cube.
+;
+;	If F is absent but L is present, the rightward face colour is visible
+;	on the left half. If R is present, the rightward face colour is visible
+;	in the right half.
+;
+;	If F and L are both absent but B is present then the leftward face colour
+;	is visible on the left half. And similarly on the right.
+;
+;	If F, L, R and B are all absent, the search proceeds to the four cubes one
+;	level down and one spot backward.
+;
+;	Due to the way that the map has been swizzled, all the Ls, Rs, Bs and Fs
+;	for any given top cube are in a single byte. So all levels can be tested
+;	at once with a single CP, at least after a run through the log2 table.
+;
 
 floorcolour	equ	0x00	; i.e. colour 0
 cubetop		equ 0x55	; i.e. colour 1
