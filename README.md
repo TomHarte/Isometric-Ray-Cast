@@ -1,6 +1,12 @@
 # Isometric Ray Casting, Ahoy!
 
-Recently I made the public observation that the map of the ZX Spectrum game, Ant Attack, permits a special case of isometric drawing in which the drawer merely selects which colour to apply to every triangle in a pattern like:
+A demo of zero-overdraw isometric drawing for the ZX Spectrum based on the Ant Attack map:
+
+![Sample scrolling](READMEImages/isoscroll.gif)
+
+# History
+
+In May 2021 I made the public observation that the map of the ZX Spectrum game, Ant Attack, permits a special case of isometric drawing in which the drawer merely selects which colour to apply to every triangle in a pattern like:
 
 ![Grid of isosceles triangles](READMEImages/isogrid.svg)
 
@@ -70,13 +76,3 @@ I'm going to swizzle that: the cube at (x, y, z) is now represented by bit z at 
 (Aside: you could flip bit order and test for lowest, with the advantage that `x & ~x+1` does the job of `lowest`, but that's still not as fast as a small lookup table so it's slightly academic for now.)
 
 Results from that are stored in a 32x49 array, from which values are then picked in threes to select 8x8 graphics tiles which are copied to the display.
-
-# Work in progress
-
-At the time of writing this README, the Z80 code is not yet fully implemented. Use this repository to follow along.
-
-The objective is output like:
-
-![Sample ouutput](READMEImages/objective.png)
-
-At the time of writing 2d output works and is what produced the image above. Casting is implemented but currently broken.
