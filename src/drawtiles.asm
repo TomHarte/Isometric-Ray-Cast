@@ -60,6 +60,9 @@ draw_row:
 		ld e, (hl)
 		inc l
 		ld d, (hl)
+
+		_bcpair equ (tiles >> 1) + ((tiles >> 9) + 1)
+		ld bc, _bcpair
 	exx
 
 		ld e, 16
@@ -74,7 +77,8 @@ draw_row:
 			; Assemble tile index in a.
 			ld a, (hl)
 
-			; or a	; Reset carry.
+			; Carry is guaranteed reset here — either because of the
+			; `add a, a` above, or the and ~7 below.
 			rra
 			rra
 
@@ -99,8 +103,13 @@ draw_row:
 				inc ix
 
 				; Map that to a tile address and copy a tile.
-				ld h, (tiles + flip*512) >> 9					; TODO: could use BC' to store the two top pointers and save three cycles here?
-																; (unless BC' is too tempting a target for a don't-redraw-if-same test as per TODO above)
+				IF !flip
+					ld h, b
+				ENDIF
+				IF flip
+					ld h, c
+				ENDIF
+
 				ld l, a
 				add hl, hl
 
