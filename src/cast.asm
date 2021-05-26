@@ -268,25 +268,23 @@ cast_map:
 
 	; Seed the current casting location.
 	ld hl, (map_location)
-	ld (start_of_row), hl
 
 	; Cast the first 2n rows.
 	REPT num_rows, index
-		ld hl, (start_of_row)
+		IF index != 0
+			pop hl
+		ENDIF
 		inc_x
-		ld (start_of_row), hl
+		push hl
 		call cast_even_row
 
-		ld hl, (start_of_row)
+		pop hl
 		inc_y
-		ld (start_of_row), hl
+		push hl
 		call cast_odd_row
 	ENDM
 
 	; Cast an additional row; an odd number is required.
-	ld hl, (start_of_row)
+	pop hl
 	inc_x
-	ld (start_of_row), hl
 	jp cast_even_row			; i.e. call cast_even_row; ret
-
-start_of_row:			dw 0
