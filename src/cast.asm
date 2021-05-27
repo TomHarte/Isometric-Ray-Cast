@@ -174,8 +174,8 @@ _front_ge_right_and_back:
 
 ENDM
 
-cast_even:	cast 0xc0
-cast_odd:	cast 0x0c
+cast_even:	cast 0x30
+cast_odd:	cast 0xc0
 
 ;
 ;	Current map location in the top left of the display.
