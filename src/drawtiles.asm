@@ -70,7 +70,7 @@ draw_row:
 
 	;
 	; Cost of unrolling here is a bit more than 2kb;
-	; the saving is 5,544 cycles. Consider worth.
+	; reroll if space becomes tight.
 	;
 
 ;		ld e, 16
