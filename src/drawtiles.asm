@@ -1,12 +1,10 @@
 ;
 ;	A lookup table for the start addresses of character lines, in reverse order.
 ;
-;	Needs to be 256-byte aligned and off by one. Entry 0 will never be used.
-;	So I've reused it for triangle_address.
+;	Needs to be 256-byte aligned.
 ;
 
 video_pointers:
-triangle_address: dw 0
 	dw 0x50e0, 0x50c0, 0x50a0, 0x5080, 0x5060, 0x5040, 0x5020, 0x5000
 	dw 0x48e0, 0x48c0, 0x48a0, 0x4880, 0x4860, 0x4840, 0x4820, 0x4800
 	dw 0x40e0, 0x40c0, 0x40a0, 0x4080, 0x4060, 0x4040, 0x4020, 0x4000
@@ -41,7 +39,7 @@ draw_tiles:
 	ld bc, 32					; Offset of next triangle line from current;
 								; possibly a waste of registers (?)
 
-	ld d, num_rows				; Row counter: there'll be `num_rows` of them.
+	ld d, num_rows-1			; Row counter: there'll be `num_rows` of them.
 
 	ld ix, output_map			; Load a pointer to the buffer of tiles drawn last time.
 								; TODO: can I do better than using IX?
@@ -148,7 +146,7 @@ draw_row:
 	ENDM
 
 	;
-	;	Add 32 to triangle_address; it gained 32 in the loop above,
+	;	Add 32 to triangle address; it gained 32 in the loop above,
 	;	so this additional 32 means that the next line drawn will start
 	;	two lines further down in the triangle buffer.
 	;
@@ -157,9 +155,9 @@ draw_row:
 	push hl
 	add ix, bc
 
-	; Continue row loop. D is valid from 24 to 1.
+	; Continue row loop. D is valid from 23 to 0.
 	dec d
-	jp nz, draw_row
+	jp p, draw_row
 
 	pop hl
 	ret
