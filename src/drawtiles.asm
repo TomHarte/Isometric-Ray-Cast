@@ -75,7 +75,7 @@ draw_row:
 
 ;		ld e, 16
 ;		draw_tile:
-	REPT 16
+	REPT 16, column
 
 		REPT 2, flip
 			; Get and increment the base triangle address.
@@ -96,20 +96,19 @@ draw_row:
 
 			add hl, bc
 			or (hl)
-			
+
 			; Compare with previously-output tile and skip if possible.
-			cp (ix+0)
+			_ixoffset equ (column * 2) + flip
+			cp (ix + _ixoffset)
 			jr nz, _draw
 
-			inc ix
 			exx
 			inc e
 			jp _next
 	
 		_draw:
 			exx
-				ld (ix+0), a
-				inc ix
+				ld (ix + _ixoffset), a
 
 				; Map that to a tile address and copy a tile.
 				IF !(flip & 1)
@@ -143,7 +142,7 @@ draw_row:
 			exx
 		ENDM
 
-		; Continue column loop. E is valid from 32 to 1.
+		; Continue column loop. E is valid from 16 to 1.
 ;		dec e
 ;		jp nz, draw_tile
 	ENDM
@@ -156,6 +155,7 @@ draw_row:
 	pop hl
 	add hl, bc
 	push hl
+	add ix, bc
 
 	; Continue row loop. D is valid from 24 to 1.
 	dec d
