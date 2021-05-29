@@ -31,10 +31,10 @@ triangle_map_size equ 32*49
 triangle_map_end equ triangle_map + triangle_map_size - 1
 
 ;
-;	Moves the view left one position and up one position
+;	Moves the view left one position and down one position
 ;	in isometric space, which means straight leftward in 2d terms.
 ;
-move_view_left_up:
+move_view_left_down:
 	ld hl, triangle_map_end - 2
 	ld de, triangle_map_end
 	ld bc, triangle_map_size - 2
@@ -85,10 +85,10 @@ move_view_left:
 	jp cast_even_column
 
 ;
-;	Moves the view left one position and down one position in isometric space,
+;	Moves the view left one position and up one position in isometric space,
 ;	which means straight upward in 2d terms.
 ;
-move_view_left_down:
+move_view_left_up:
 	ld hl, triangle_map_end - 64
 	ld de, triangle_map_end
 	ld bc, triangle_map_size - 64
@@ -296,3 +296,4 @@ _scroll_table:
 	dw move_view_down			; 1101 : down.
 	dw move_view_up				; 1110 : up.
 	dw _no_scroll				; 1111 : nothing.
+	
