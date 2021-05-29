@@ -55,9 +55,7 @@ move_view_left_up:
 	; Recast the one-from-left column.
 	ld ix, triangle_map+1
 	pop hl
-	call cast_odd_column
-
-	ret
+	jp cast_odd_column
 
 ;
 ;	Moves the view left one position in isometric space,
@@ -84,9 +82,7 @@ move_view_left:
 	; Cast left column.
 	ld ix, triangle_map
 	pop hl
-	call cast_even_column
-
-	ret
+	jp cast_even_column
 
 ;
 ;	Moves the view left one position and down one position in isometric space,
@@ -114,9 +110,7 @@ move_view_left_down:
 
 	pop hl
 	inc_y
-	call cast_odd_row
-
-	ret
+	jp cast_odd_row
 
 ;
 ;	Moves the view down one position in isometric space,
@@ -144,9 +138,7 @@ move_view_down:
 	pop hl
 	add_xy num_rows, num_rows
 	ld ix, triangle_map + num_rows * 32 * 2
-	call cast_even_row
-
-	ret
+	jp cast_even_row
 
 ;
 ;	Moves the view right one position and up one position
@@ -174,9 +166,7 @@ move_view_right_down:
 
 	pop hl
 	inc_x
-	call cast_even_row
-
-	ret
+	jp cast_even_row
 
 ;
 ;	Moves the view right one position in isometric space,
@@ -203,9 +193,7 @@ move_view_right:
 	ld ix, triangle_map+31
 	ld hl, (map_location)
 	add_xy 16, -15
-	call cast_odd_column
-
-	ret
+	jp cast_odd_column
 
 ;
 ;	Moves the view right one position and up one position in isometric space,
@@ -232,9 +220,7 @@ move_view_right_up:
 	; Cast right column.
 	ld ix, triangle_map+31
 	pop hl
-	call cast_odd_column
-
-	ret
+	jp cast_odd_column
 
 ;
 ;	Moves the view up one position in isometric space,
@@ -261,6 +247,52 @@ move_view_up:
 	ld hl, (map_location)
 	inc_x
 	ld ix, triangle_map
-	call cast_even_row
+	jp cast_even_row
 
+;
+;	Scrolls according to the direction flags in a,
+;	which has the same form as the Sinclair Interface 2
+;	keyboard row, i.e.
+;
+;	b0 = unused;
+;	b1 = scroll up [if reset];
+;	b2 = scroll down [if reset];
+;	b3 = scroll right [if reset];
+;	b4 = scroll left [if reset].
+;
+scroll:
+	and 0x1e
+
+	ld b, 0
+	ld c, a
+
+	ld hl, _scroll_table
+	add hl, bc
+
+	ld e, (hl)
+	inc hl
+	ld d, (hl)
+
+	ex de, hl
+	jp (hl)
+
+_no_scroll:
 	ret
+
+_scroll_table:
+	dw _no_scroll				; 0000 : left, right, down and up.
+	dw move_view_down			; 0001 : left, right and down
+	dw move_view_up				; 0010 : left, right and up.
+	dw _no_scroll				; 0011 : left and right.
+	dw move_view_left			; 0100 : left, up and down.
+	dw move_view_left_down		; 0101 : left and down.
+	dw move_view_left_up		; 0110 : left and up
+	dw move_view_left			; 0111 : left.
+	dw move_view_right			; 1000 : right, up and down.
+	dw move_view_right_down		; 1001 : right and down.
+	dw move_view_right_up		; 1010 : right and up.
+	dw move_view_right			; 1011 : right.
+	dw _no_scroll				; 1100 : up and down.
+	dw move_view_down			; 1101 : down.
+	dw move_view_up				; 1110 : up.
+	dw _no_scroll				; 1111 : nothing.
