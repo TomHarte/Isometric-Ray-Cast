@@ -326,7 +326,7 @@ cast_even_column:
 	inc_x
 	call cast_even_diamond
 	_here equ 23
-	ld (ix + (num_rows & 3)*64), l
+	ld (ix + (num_rows & 1)*64), l
 
 	ret
 

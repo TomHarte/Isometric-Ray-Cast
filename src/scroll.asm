@@ -27,8 +27,8 @@ fix_up:
 
 	ret
 
-triangle_map_size equ 32*49
-triangle_map_end equ triangle_map + triangle_map_size - 1
+triangle_map_size	equ 32*(num_rows*2 + 1)
+triangle_map_end	equ triangle_map + triangle_map_size - 1
 
 ;
 ;	Moves the view left one position and down one position

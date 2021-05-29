@@ -3,7 +3,7 @@
 	;
 	; Defines the number of rows calculated and drawn.
 	;
-	num_rows equ 24
+	num_rows equ 14
 
 	INCLUDE "src/tiles.inc"
 	INCLUDE "src/drawtiles.asm"
