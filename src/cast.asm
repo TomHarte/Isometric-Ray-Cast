@@ -292,35 +292,41 @@ cast_odd_row:
 
 cast_even_column:
 	exx
-		ld de, 64
+		ld de, 128		; Not 256 (yet) because I'd need to be more careful about offset being signed
+						; in the loop below.
 	exx
 
 	push hl
 
-	REPT 24, row
+	REPT num_rows, row
+		_offset equ (row & 1)*64
+
 		IF row
 			pop hl
 			inc_x
 			push hl
 		ENDIF
 		call cast_even_diamond
-		ld (ix + 0), l
+		ld (ix + _offset), l
 
 		pop hl
 		inc_y
 		push hl
 		call cast_odd_diamond
-		ld (ix + 32), h
+		ld (ix + _offset + 32), h
 
-		exx
-		add ix, de
-		exx
+		IF _offset = 64
+			exx
+			add ix, de
+			exx
+		ENDIF
 	ENDM
 
 	pop hl
 	inc_x
 	call cast_even_diamond
-	ld (ix + 0), l
+	_here equ 23
+	ld (ix + (num_rows & 3)*64), l
 
 	ret
 
@@ -343,36 +349,40 @@ cast_even_column:
 
 cast_odd_column:
 	exx
-		ld de, 64
+		ld de, 128
 	exx
 
 	push hl
 
-	REPT 24, row
+	REPT num_rows, row
+		_offset equ (row & 1)*64
+
 		IF row
 			pop hl
 			inc_y
 			push hl
 		ENDIF
 		call cast_even_diamond
-		ld (ix + 0), h
+		ld (ix + _offset), h
 
 		pop hl
 		inc_x
 		push hl
 		call cast_odd_diamond
-		ld (ix + 32), l
+		ld (ix + _offset + 32), l
 
-		exx
-		add ix, de
-		exx
+		IF _offset = 64
+			exx
+			add ix, de
+			exx
+		ENDIF
 	ENDM
 
 	pop hl
 	inc_y
 	call cast_even_diamond
-	ld (ix + 0), h
-
+	ld (ix + (num_rows & 1)*64), h
+	
 	ret
 
 ;
@@ -405,3 +415,4 @@ cast_map:
 	pop hl
 	inc_x
 	jp cast_even_row			; i.e. call cast_even_row; ret
+	
