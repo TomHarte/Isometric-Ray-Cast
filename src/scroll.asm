@@ -177,3 +177,32 @@ move_view_right_down:
 	call cast_even_row
 
 	ret
+
+;
+;	Moves the view right one position in isometric space,
+;	which means diagonally to the right and downward in 2d terms.
+;
+move_view_right:
+	ld hl, triangle_map + 33
+	ld de, triangle_map
+	ld bc, triangle_map_size - 33
+	ldir
+	call fix_up
+
+	; Update the map location.
+	ld hl, (map_location)
+	inc_x
+	ld (map_location), hl
+
+	; Cast bottom row.
+	ld ix, triangle_map + num_rows*64
+	add_xy num_rows+1, num_rows
+	call cast_even_row
+
+	; Cast right column.
+	ld ix, triangle_map+31
+	ld hl, (map_location)
+	add_xy 16, -15
+	call cast_odd_column
+
+	ret
