@@ -1,7 +1,11 @@
 	org $8000
 
 	;
-	; Defines the number of rows calculated and drawn.
+	;	Defines the number of rows calculated and drawn.
+	;
+	;	Due to current contents of video_pointers in drawtiles.asm, the rows drawn
+	;	will always be those at the bottom of the display. Adjust that if you
+	;	want to use some other portion for output.
 	;
 	num_rows equ 24
 

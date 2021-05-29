@@ -10,8 +10,9 @@ video_pointers:
 	dw 0x40e0, 0x40c0, 0x40a0, 0x4080, 0x4060, 0x4040, 0x4020, 0x4000
 
 ;
-;	Ephemeral work buffer for current triangle colours, 32 columns by 49 rows,
-;	indexed linearly from top left to bottom right.
+;	Ephemeral work buffer for current triangle colours, 32 columns by
+;	49 rows (assuming a 24-row final output), indexed linearly from top
+;	left to bottom right.
 ;
 ;	Even lines contain the colour index of [0, 3] shifted up to bits 6 and 7;
 ;	odd lines use bits 3 and 2.
@@ -19,14 +20,14 @@ video_pointers:
 ;	Currently no alignment requirement; cf. the use of (IX+n) in cast.asm.
 ;
 
-triangle_map:	ds 32*49
+triangle_map:	ds 32*(num_rows*2 + 1)
 
 ;
 ;	Map of tiles currently on screen.
 ;
 ;	No particular alignment requirements right now.
 ;
-output_map: 	ds 32*24, 1
+output_map: 	ds 32*num_rows, 1
 
 ;
 ;	Outputs the current state of the triangle map, in full.

@@ -49,13 +49,23 @@
 ;	for any given top cube are in a single byte. So all levels can be tested
 ;	at once with a single CP, at least after a run through the log2 table.
 ;
+;	----
+;
+;	Note on axes in use here:
+;
+;	If B were at the origin then:
+;
+;		- R would be at (1, 0);
+;		- L would be at (0, 1); and
+;		- F would be at (1, 1).
+;
 
 floorcolour	equ	0x00	; i.e. colour 0
 cubetop		equ 0x1c	; i.e. colour 1
 leftwall	equ 0xe0	; i.e. colour 2
 rightwall	equ	0xfc	; i.e. colour 3
 
-cast MACRO mask
+cast_diamond MACRO mask
 	; Read from (x, y).
 	ld b, (hl)		; i.e. b = 'front'.
 	
@@ -174,8 +184,13 @@ _front_ge_right_and_back:
 
 ENDM
 
-cast_even:	cast 0x48
-cast_odd:	cast 0x90
+;
+;	Two instantiations of cast_diamond are assembled, one that generates the correct bit
+;	patterns for even rows and one for odds. Different bit patterns are used for
+;	alternate rows in order slightly to reduce costs in tile output.
+;
+cast_even_diamond:	cast_diamond 0x48	; i.e. a diamond on an even row: rows 0, 2, 4 ...
+cast_odd_diamond:	cast_diamond 0x90	; i.e. a diamond on an odd row: rows 1, 3, 5 ...
 
 ;
 ;	Current map location in the top left of the display.
@@ -193,7 +208,7 @@ map_location:	dw 0xc0ff
 cast_even_row:
 	; Fill the first diamond.
 	push hl
-	call cast_even
+	call cast_even_diamond
 	ld (ix+0), l
 	ld (ix+1), h
 
@@ -208,7 +223,7 @@ cast_even_row:
 		ENDIF
 
 		; Cast and store.
-		call cast_even
+		call cast_even_diamond
 		ld (ix+(offset*2)+2), l
 		ld (ix+(offset*2)+3), h
 	ENDM
@@ -229,7 +244,7 @@ cast_even_row:
 cast_odd_row:
 	; Fill the single triangle on the left.
 	push hl
-	call cast_odd
+	call cast_odd_diamond
 	ld (ix+0), h
 
 	; Fill all the intermediate diamonds.
@@ -240,7 +255,7 @@ cast_odd_row:
 		push hl
 
 		; Cast and store.
-		call cast_odd
+		call cast_odd_diamond
 		ld (ix+(offset*2)+1), l
 		ld (ix+(offset*2)+2), h
 	ENDM
@@ -250,7 +265,7 @@ cast_odd_row:
 	pop hl
 	inc_x_dec_y
 	
-	call cast_odd
+	call cast_odd_diamond
 	ld (ix+31), l
 
 	; Advance IX and return.
@@ -277,35 +292,41 @@ cast_odd_row:
 
 cast_even_column:
 	exx
-		ld de, 64
+		ld de, 128		; Not 256 (yet) because I'd need to be more careful about offset being signed
+						; in the loop below.
 	exx
 
 	push hl
 
-	REPT 24, row
+	REPT num_rows, row
+		_offset equ (row & 1)*64
+
 		IF row
 			pop hl
 			inc_x
 			push hl
 		ENDIF
-		call cast_even
-		ld (ix + 0), l
+		call cast_even_diamond
+		ld (ix + _offset), l
 
 		pop hl
 		inc_y
 		push hl
-		call cast_odd
-		ld (ix + 32), h
+		call cast_odd_diamond
+		ld (ix + _offset + 32), h
 
-		exx
-		add ix, de
-		exx
+		IF _offset = 64
+			exx
+			add ix, de
+			exx
+		ENDIF
 	ENDM
 
 	pop hl
 	inc_x
-	call cast_even
-	ld (ix + 0), l
+	call cast_even_diamond
+	_here equ 23
+	ld (ix + (num_rows & 1)*64), l
 
 	ret
 
@@ -328,35 +349,39 @@ cast_even_column:
 
 cast_odd_column:
 	exx
-		ld de, 64
+		ld de, 128
 	exx
 
 	push hl
 
-	REPT 24, row
+	REPT num_rows, row
+		_offset equ (row & 1)*64
+
 		IF row
 			pop hl
 			inc_y
 			push hl
 		ENDIF
-		call cast_even
-		ld (ix + 0), h
+		call cast_even_diamond
+		ld (ix + _offset), h
 
 		pop hl
 		inc_x
 		push hl
-		call cast_odd
-		ld (ix + 32), l
+		call cast_odd_diamond
+		ld (ix + _offset + 32), l
 
-		exx
-		add ix, de
-		exx
+		IF _offset = 64
+			exx
+			add ix, de
+			exx
+		ENDIF
 	ENDM
 
 	pop hl
 	inc_y
-	call cast_even
-	ld (ix + 0), h
+	call cast_even_diamond
+	ld (ix + (num_rows & 1)*64), h
 
 	ret
 
