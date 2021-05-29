@@ -206,3 +206,32 @@ move_view_right:
 	call cast_odd_column
 
 	ret
+
+;
+;	Moves the view right one position and up one position in isometric space,
+;	which means straight right in 2d terms.
+;
+move_view_right_up:
+	ld hl, triangle_map + 2
+	ld de, triangle_map
+	ld bc, triangle_map_size - 2
+	ldir
+
+	; Update the map location.
+	ld hl, (map_location)
+	inc_x
+	dec_y
+	ld (map_location), hl
+
+	; Cast one-from-right column.
+	ld ix, triangle_map+30
+	add_xy 16, -15
+	push hl
+	call cast_even_column
+
+	; Cast right column.
+	ld ix, triangle_map+31
+	pop hl
+	call cast_odd_column
+
+	ret
