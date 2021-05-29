@@ -11,7 +11,7 @@ MACRO fix_odd
 		inc hl
 	ENDM
 ENDM
-	
+
 fix_up:
 	ld b, num_rows
 	ld hl, triangle_map
@@ -32,13 +32,9 @@ triangle_map_end equ triangle_map + triangle_map_size - 1
 
 ;
 ;	Moves the view left one position and up one position
-;	in isometric space, which means straight upward in 2d terms.
+;	in isometric space, which means straight leftward in 2d terms.
 ;
 move_view_left_up:
-	;
-	; This is easy because it's just a scroll upward in 2d terms.
-	; So shift the triangle map right by a rows and recast the two leftmost column.
-	;
 	ld hl, triangle_map_end - 2
 	ld de, triangle_map_end
 	ld bc, triangle_map_size - 2
@@ -68,14 +64,6 @@ move_view_left_up:
 ;	which means diagonally to the left and upward in 2d terms.
 ;
 move_view_left:
-	;
-	; Copy each triangle to the position one row down and one column across,
-	; shifting appropriately because they'll have swapped rows.
-	;
-	; Then recast the top row and the leftmost column.
-	;
-
-	; Use an LDDR to do the initial relocation, then fix up.
 	ld hl, triangle_map_end - 33
 	ld de, triangle_map_end
 	ld bc, triangle_map_size - 33
@@ -102,13 +90,9 @@ move_view_left:
 
 ;
 ;	Moves the view left one position and down one position in isometric space,
-;	which means straight to the left in 2d terms.
+;	which means straight upward in 2d terms.
 ;
 move_view_left_down:
-	;
-	; This is easy because it's just a scroll upward in 2d terms.
-	; So shift the triangle map down by two rows and recast the top.
-	;
 	ld hl, triangle_map_end - 64
 	ld de, triangle_map_end
 	ld bc, triangle_map_size - 64
@@ -139,14 +123,6 @@ move_view_left_down:
 ;	which means diagonally to the left and downward in 2d terms.
 ;
 move_view_down:
-	;
-	; Copy each triangle to the position one row down and one column across,
-	; shifting appropriately because they'll have swapped rows.
-	;
-	; Then recast the top row and the leftmost column.
-	;
-
-	; Use an LDIR to do the initial relocation, then fix up.
 	ld hl, triangle_map + 32
 	ld de, triangle_map + 1
 	ld bc, triangle_map_size - 33
@@ -168,6 +144,36 @@ move_view_down:
 	pop hl
 	add_xy num_rows, num_rows
 	ld ix, triangle_map + num_rows * 32 * 2
+	call cast_even_row
+
+	ret
+
+;
+;	Moves the view right one position and up one position
+;	in isometric space, which means straight downward in 2d terms.
+;
+move_view_right_down:
+	ld hl, triangle_map + 64
+	ld de, triangle_map
+	ld bc, triangle_map_size - 32*2
+	ldir
+
+	; Update the map location.
+	ld hl, (map_location)
+	inc_x
+	inc_y
+	ld (map_location), hl
+
+	; Set the triangle destination pointer.
+	ld ix, triangle_map + (num_rows-1)*64 + 32
+
+	; Seed the current casting location.
+	add_xy num_rows, num_rows
+	push hl
+	call cast_odd_row
+
+	pop hl
+	inc_x
 	call cast_even_row
 
 	ret
