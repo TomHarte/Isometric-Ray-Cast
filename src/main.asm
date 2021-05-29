@@ -34,7 +34,7 @@ display:
 	rra
 	jr c, display
 
-	call move_view_left
+	call move_view_down
 	jp display
 
 	; Read keyboard to scroll.

@@ -127,10 +127,46 @@ move_view_left_down:
 	inc_x
 	push hl
 	call cast_even_row
-	
+
 	pop hl
 	inc_y
 	call cast_odd_row
 
 	ret
 
+;
+;	Moves the view down one position in isometric space,
+;	which means diagonally to the left and downward in 2d terms.
+;
+move_view_down:
+	;
+	; Copy each triangle to the position one row down and one column across,
+	; shifting appropriately because they'll have swapped rows.
+	;
+	; Then recast the top row and the leftmost column.
+	;
+
+	; Use an LDDR to do the initial relocation, then fix up.
+	ld hl, triangle_map + 32
+	ld de, triangle_map + 1
+	ld bc, triangle_map_size - 33
+	ldir
+	call fix_up
+
+	; Update the map location.
+	ld hl, (map_location)
+	inc_y
+	ld (map_location), hl
+
+	; Cast left column.
+	ld ix, triangle_map
+	push hl
+	call cast_even_column
+
+	; Cast bottom row.
+	pop hl
+	add_xy num_rows, num_rows
+	ld ix, triangle_map + num_rows * 32 * 2
+	call cast_even_row
+
+	ret
