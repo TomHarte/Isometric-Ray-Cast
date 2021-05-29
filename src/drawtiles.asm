@@ -87,7 +87,6 @@ draw_row:
 			; Carry is guaranteed reset here — either because of the
 			; `add a, a` above, or the and ~7 below.
 			rra
-			rra
 
 			add hl, bc
 			or (hl)

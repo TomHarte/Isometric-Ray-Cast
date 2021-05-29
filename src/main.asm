@@ -9,6 +9,8 @@
 	INCLUDE "src/drawtiles.asm"
 	INCLUDE "src/addressmanipulation.asm"
 	INCLUDE "src/cast.asm"
+	INCLUDE "src/scroll.asm"
+
 
 ;
 ;	Main entry point. Just a test loop for now.
@@ -18,9 +20,22 @@ start:
 	di
 	ld sp, highest_bit_table
 
-display:
+	; Establish initial map state
 	call cast_map
+
+display:
 	call draw_tiles
+
+	; TEMPORARY TEST: upon any press of Q just do
+	; whichever directional scroll I'm testing
+	; right now.
+	ld bc, 0xfbfe
+	in a, (c)
+	rra
+	jr c, display
+
+	call scroll_left_down
+	jp display
 
 	; Read keyboard to scroll.
 	ld hl, (map_location)
