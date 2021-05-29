@@ -382,7 +382,7 @@ cast_odd_column:
 	inc_y
 	call cast_even_diamond
 	ld (ix + (num_rows & 1)*64), h
-	
+
 	ret
 
 ;
@@ -415,4 +415,3 @@ cast_map:
 	pop hl
 	inc_x
 	jp cast_even_row			; i.e. call cast_even_row; ret
-	

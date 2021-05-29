@@ -296,4 +296,3 @@ _scroll_table:
 	dw move_view_down			; 1101 : down.
 	dw move_view_up				; 1110 : up.
 	dw _no_scroll				; 1111 : nothing.
-	
