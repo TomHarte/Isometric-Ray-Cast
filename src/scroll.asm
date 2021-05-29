@@ -146,7 +146,7 @@ move_view_down:
 	; Then recast the top row and the leftmost column.
 	;
 
-	; Use an LDDR to do the initial relocation, then fix up.
+	; Use an LDIR to do the initial relocation, then fix up.
 	ld hl, triangle_map + 32
 	ld de, triangle_map + 1
 	ld bc, triangle_map_size - 33
@@ -160,6 +160,7 @@ move_view_down:
 
 	; Cast left column.
 	ld ix, triangle_map
+	inc_x
 	push hl
 	call cast_even_column
 
