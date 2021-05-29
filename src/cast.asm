@@ -51,9 +51,9 @@
 ;
 
 floorcolour	equ	0x00	; i.e. colour 0
-cubetop		equ 0x55	; i.e. colour 1
-leftwall	equ 0xaa	; i.e. colour 2
-rightwall	equ	0xff	; i.e. colour 3
+cubetop		equ 0x1c	; i.e. colour 1
+leftwall	equ 0xe0	; i.e. colour 2
+rightwall	equ	0xfc	; i.e. colour 3
 
 cast MACRO mask
 	; Read from (x, y).
@@ -174,8 +174,8 @@ _front_ge_right_and_back:
 
 ENDM
 
-cast_even:	cast 0xc0
-cast_odd:	cast 0x0c
+cast_even:	cast 0x48
+cast_odd:	cast 0x90
 
 ;
 ;	Current map location in the top left of the display.
@@ -256,6 +256,108 @@ cast_odd_row:
 	; Advance IX and return.
 	ld de, 32
 	add ix, de
+	ret
+
+;
+;	Casts an even column of tiles, i.e. one containing 49 triangles
+;	triangles in which the top, truncated one is facing left.
+;	i.e.
+;
+;	____
+;	|\ |
+;	| \|
+;	| /|
+;	|/ |
+;	|\ |
+;	| \|
+;	| /|
+;	|/ |
+;	... etc ...
+;
+
+cast_even_column:
+	exx
+		ld de, 64
+	exx
+
+	push hl
+
+	REPT 24, row
+		IF row
+			pop hl
+			inc_x
+			push hl
+		ENDIF
+		call cast_even
+		ld (ix + 0), l
+
+		pop hl
+		inc_y
+		push hl
+		call cast_odd
+		ld (ix + 32), h
+
+		exx
+		add ix, de
+		exx
+	ENDM
+
+	pop hl
+	inc_x
+	call cast_even
+	ld (ix + 0), l
+
+	ret
+
+;
+;	Casts an odd column of tiles, i.e. one containing 49 triangles
+;	triangles in which the top, truncated one is facing right.
+;	i.e.
+;
+;	____
+;	| /|
+;	|/ |
+;	|\ |
+;	| \|
+;	| /|
+;	|/ |
+;	|\ |
+;	| \|
+;	... etc ...
+;
+
+cast_odd_column:
+	exx
+		ld de, 64
+	exx
+
+	push hl
+
+	REPT 24, row
+		IF row
+			pop hl
+			inc_y
+			push hl
+		ENDIF
+		call cast_even
+		ld (ix + 0), h
+
+		pop hl
+		inc_x
+		push hl
+		call cast_odd
+		ld (ix + 32), l
+
+		exx
+		add ix, de
+		exx
+	ENDM
+
+	pop hl
+	inc_y
+	call cast_even
+	ld (ix + 0), h
+
 	ret
 
 ;

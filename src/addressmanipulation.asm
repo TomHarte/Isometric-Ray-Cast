@@ -57,3 +57,19 @@ inc_x_dec_y MACRO
 	rr l		; 8 = 54
 ENDM
 
+add_xy MACRO x, y
+	add hl, hl
+
+	ld a, l
+	add a, y
+	add a, y
+	ld l, a
+
+	ld a, h
+	add a, x
+	or 0x80
+	ld h, a
+
+	sra h
+	rr l
+ENDM

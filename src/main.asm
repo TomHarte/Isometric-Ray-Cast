@@ -9,6 +9,8 @@
 	INCLUDE "src/drawtiles.asm"
 	INCLUDE "src/addressmanipulation.asm"
 	INCLUDE "src/cast.asm"
+	INCLUDE "src/scroll.asm"
+
 
 ;
 ;	Main entry point. Just a test loop for now.
@@ -18,44 +20,44 @@ start:
 	di
 	ld sp, highest_bit_table
 
-display:
+	; Establish initial map state
 	call cast_map
+
+display:
 	call draw_tiles
 
-	; Read keyboard to scroll.
-	ld hl, (map_location)
+	;
+	; Check for a scroll...
+	;
 
-	ld bc, 0xfbfe
+	; Copy P and O to left and right.
+	ld bc, 0xdffe
 	in a, (c)
-	rra
-	jr c, _no_q
-	dec_y
+	and #3
+	ld d, a
 
-_no_q:
+	; Check for down.
 	ld bc, 0xfdfe
 	in a, (c)
 	rra
-	jr c, _no_a
-	inc_y
-	
-_no_a:
-	ld bc, 0xdffe
+	rl d
+
+	; Check for up.
+	ld bc, 0xfbfe
 	in a, (c)
 	rra
-	jr c, _no_p
-	inc_x
-	
-_no_p:
-	ld bc, 0xdffe
+	rl d
+
+	; Shift once more, include joystick controls and scroll
+	rl d
+	ld bc, 0xeffe
 	in a, (c)
-	rra
-	rra
-	jr c, _no_o
-	dec_x
+	and d
+	call scroll
 
-_no_o:
-
-	ld (map_location), hl	
+	;
+	; ... and repeat
+	;
 	jp display
 
 ;

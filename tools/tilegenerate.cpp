@@ -17,14 +17,14 @@ int main(int argc, char *argv[]) {
 		0b1000'0000, 0b1110'0000, 0b1111'1000, 0b1111'1110
 	};
 
-	// Addressing is: [flip][bottom][top][middle] 		(000)
+	// Addressing is: [flip]	[m1][b1][t1][m0]	[b0][t0]
 
 	for(int n = 0; n < 4*4*4*2; n++) {
 		
-		const int flip = n >> 6;
-		const int top = (n >> 2) & 3;
-		const int bottom = (n >> 4) & 3;
-		const int middle = (n >> 0) & 3;
+		const int flip 		= n >> 6;
+		const int middle	= ((n >> 4) & 2) | ((n >> 2) & 1);
+		const int bottom	= ((n >> 3) & 2) | ((n >> 1) & 1);
+		const int top		= ((n >> 2) & 2) | ((n >> 0) & 1);
 
 		printf("db ");
 
