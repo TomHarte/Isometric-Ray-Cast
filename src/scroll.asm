@@ -30,7 +30,44 @@ fix_up:
 triangle_map_size equ 32*49
 triangle_map_end equ triangle_map + triangle_map_size - 1
 
-scroll_left:
+;
+;	Moves the view left one position and up one position
+;	in isometric space, which means straight upward in 2d terms.
+;
+move_view_left_up:
+	;
+	; This is easy because it's just a scroll upward in 2d terms.
+	; So shift the triangle map right by a rows and recast the two leftmost column.
+	;
+	ld hl, triangle_map_end - 2
+	ld de, triangle_map_end
+	ld bc, triangle_map_size - 2
+	lddr
+
+	; Update the map location.
+	ld hl, (map_location)
+	dec_x
+	inc_y
+	ld (map_location), hl
+
+	; Recast the left column.
+	ld ix, triangle_map
+	inc_x
+	push hl
+	call cast_even_column
+
+	; Recast the one-from-left column.
+	ld ix, triangle_map+1
+	pop hl
+	call cast_odd_column
+
+	ret
+
+;
+;	Moves the view left one position in isometric space,
+;	which means diagonally to the left and upward in 2d terms.
+;
+move_view_left:
 	;
 	; Copy each triangle to the position one row down and one column across,
 	; shifting appropriately because they'll have swapped rows.
@@ -63,7 +100,11 @@ scroll_left:
 
 	ret
 
-scroll_left_up:
+;
+;	Moves the view left one position and down one position in isometric space,
+;	which means straight to the left in 2d terms.
+;
+move_view_left_down:
 	;
 	; This is easy because it's just a scroll upward in 2d terms.
 	; So shift the triangle map down by two rows and recast the top.
@@ -93,31 +134,3 @@ scroll_left_up:
 
 	ret
 
-scroll_left_down:
-	;
-	; This is easy because it's just a scroll upward in 2d terms.
-	; So shift the triangle map right by a rows and recast the two leftmost column.
-	;
-	ld hl, triangle_map_end - 2
-	ld de, triangle_map_end
-	ld bc, triangle_map_size - 2
-	lddr
-
-	; Update the map location.
-	ld hl, (map_location)
-	dec_x
-	inc_y
-	ld (map_location), hl
-
-	; Recast the left column.
-	ld ix, triangle_map
-	inc_x
-	push hl
-	call cast_even_column
-
-	; Recast the one-from-left column.
-	ld ix, triangle_map+1
-	pop hl
-	call cast_odd_column
-
-	ret
