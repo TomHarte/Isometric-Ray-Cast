@@ -1,8 +1,21 @@
 # Isometric Ray Casting, Ahoy!
 
-A demo of zero-overdraw isometric drawing for the ZX Spectrum based on the Ant Attack map:
+A demo of zero-overdraw isometric drawing for the ZX Spectrum currently featuring on the Ant Attack map:
 
 ![Sample scrolling](READMEImages/isoscroll.gif)
+
+# Stats
+
+At fullscreen: 14 fps.
+
+At just larger than the window in Ant Attack: 26 fps.
+
+Memory usage:
+* 16kb for the map, exactly like Ant Attack;
+* the full screen of 6,912 is used;
+* at 32x14, a further 7,578 bytes is used for tables and all existing code; at 32x24 this grows to 9,478 bytes.
+
+Therefore on a 48kb Spectrum there remains around 16kb of space for other graphics and game code at 32x24. If further space were needed then the above spends about 2kb on unrolling the final 2d output stage, for a saving of only of the order of 10,000 cycles. That could be reclaimed.
 
 # Build Requirements
 
