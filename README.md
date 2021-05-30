@@ -6,7 +6,7 @@ A demo of zero-overdraw isometric drawing for the ZX Spectrum currently featurin
 
 # Stats
 
-At fullscreen: 14 fps.
+At fullscreen: 15 fps.
 
 At just larger than the window in Ant Attack: 26 fps.
 
