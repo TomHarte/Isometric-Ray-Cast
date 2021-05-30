@@ -1,32 +1,3 @@
-MACRO fix_even
-	REPT 32
-		srl (hl)
-		inc hl		; TODO: increment l only and fix h outside of the loop?
-	ENDM
-ENDM
-
-MACRO fix_odd
-	REPT 32
-		sla (hl)
-		inc hl
-	ENDM
-ENDM
-
-fix_up:
-	ld b, num_rows
-	ld hl, triangle_map
-
-	line:
-		fix_even
-		fix_odd
-
-		dec b
-		jp nz, line
-
-	fix_even
-
-	ret
-
 triangle_map_size	equ 32*(num_rows*2 + 1)
 triangle_map_end	equ triangle_map + triangle_map_size - 1
 
@@ -66,7 +37,6 @@ move_view_left:
 	ld de, triangle_map_end
 	ld bc, triangle_map_size - 33
 	lddr
-	call fix_up
 
 	; Update the map location.
 	ld hl, (map_location)
@@ -121,7 +91,6 @@ move_view_down:
 	ld de, triangle_map + 1
 	ld bc, triangle_map_size - 33
 	ldir
-	call fix_up
 
 	; Update the map location.
 	ld hl, (map_location)
@@ -177,7 +146,6 @@ move_view_right:
 	ld de, triangle_map
 	ld bc, triangle_map_size - 33
 	ldir
-	call fix_up
 
 	; Update the map location.
 	ld hl, (map_location)
@@ -231,7 +199,6 @@ move_view_up:
 	ld de, triangle_map_end - 1
 	ld bc, triangle_map_size - 33
 	lddr
-	call fix_up
 
 	; Update the map location.
 	ld hl, (map_location)

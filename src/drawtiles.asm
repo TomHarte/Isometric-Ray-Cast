@@ -34,23 +34,22 @@ output_map: 	ds 32*num_rows, 1
 ;
 
 draw_tiles:
-	ld hl, triangle_map-1
-	push hl						; Seed pointer into triangle map.
-
 	ld bc, 32					; Offset of next triangle line from current;
 								; possibly a waste of registers (?)
 
-	ld d, num_rows-1			; Row counter: there'll be `num_rows` of them.
+	ld iyl, num_rows-1			; Row counter: there'll be `num_rows` of them.
 
 	ld ix, output_map			; Load a pointer to the buffer of tiles drawn last time.
 								; TODO: can I do better than using IX?
+
+	ld de, triangle_map			; Seed pointer into triangle map.
 
 draw_row:
 	;
 	; DE' = video address for start of line.
 	;
 
-	ld a, d
+	ld a, iyl
 	exx
 		add a, a
 		ld l, a
@@ -72,25 +71,26 @@ draw_row:
 	; reroll if space becomes tight.
 	;
 
-;		ld e, 16
+;		ld iyh, 16
 ;		draw_tile:
 	REPT 16, column
 
 		REPT 2, flip
-			; Get and increment the base triangle address.
-			pop hl
-			inc hl
-			push hl
-
-			; Assemble tile index in a.
-			ld a, (hl)
+			; Get and increment the base triangle address;
+			ld h, d
+			ld l, e
+			inc de
 
 			; Carry is guaranteed reset here — either because of the
 			; `add a, a` above, or the and ~7 below.
+
+			; Assemble tile index in a.
+			ld a, (hl)
 			rra
 
 			add hl, bc
 			or (hl)
+			rra
 
 			add hl, bc
 			or (hl)
@@ -101,8 +101,8 @@ draw_row:
 			jr nz, _draw
 
 			exx
-			inc e
-			jp _next
+				inc e
+				jp _next
 	
 		_draw:
 			exx
@@ -140,8 +140,8 @@ draw_row:
 			exx
 		ENDM
 
-		; Continue column loop. E is valid from 16 to 1.
-;		dec e
+		; Continue column loop. IYh is valid from 16 to 1.
+;		dec iyh
 ;		jp nz, draw_tile
 	ENDM
 
@@ -150,14 +150,14 @@ draw_row:
 	;	so this additional 32 means that the next line drawn will start
 	;	two lines further down in the triangle buffer.
 	;
-	pop hl
+	ex de, hl
 	add hl, bc
-	push hl
+	ex de, hl
 	add ix, bc
 
-	; Continue row loop. D is valid from 23 to 0.
-	dec d
+	; Continue row loop. IYl is valid from 23 to 0.
+	dec iyl
 	jp p, draw_row
 
-	pop hl
 	ret
+	
