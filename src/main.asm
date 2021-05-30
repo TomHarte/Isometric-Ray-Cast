@@ -24,7 +24,7 @@ start:
 	di
 	ld sp, highest_bit_table
 
-	; Establish initial map state
+	; Establish initial map state.
 	call cast_map
 
 display:
@@ -52,7 +52,7 @@ display:
 	rra
 	rl d
 
-	; Shift once more, include joystick controls and scroll
+	; Shift once more, include joystick controls, and scroll.
 	rl d
 	ld bc, 0xeffe
 	in a, (c)
@@ -60,12 +60,16 @@ display:
 	call scroll
 
 	;
-	; ... and repeat
+	; ... and repeat.
 	;
 	jp display
 
 ;
 ;	A table that maps from x to the value of the highest bit in x.
+;
+;	The original Ant Attack map uses only the lowest six bits of a byte, meaning
+;	that a 64-value lookup table would work for it. I've included 256 values
+;	with an eye to supporting slightly taller maps.
 ;
 
 	org $bf00

@@ -7,9 +7,6 @@
 ;
 ;		HL = the map address to cast for.
 ;
-;	Both are in the range [0, 127]
-;
-;
 ;	In this diagram:
 ;
 ;		      /\
@@ -45,9 +42,10 @@
 ;	If F, L, R and B are all absent, the search proceeds to the four cubes one
 ;	level down and one spot backward.
 ;
-;	Due to the way that the map has been swizzled, all the Ls, Rs, Bs and Fs
-;	for any given top cube are in a single byte. So all levels can be tested
-;	at once with a single CP, at least after a run through the log2 table.
+;	Due to the way that the map has been swizzled, one byte will contain
+;	all the Ls, another all the Rs, a third the Bs and a fourth the Fs. So all
+;	levels can be tested at once with a single CP, at least after a run through
+;	the log2 table.
 ;
 ;	----
 ;
