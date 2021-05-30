@@ -185,12 +185,15 @@ _front_ge_right_and_back:
 ENDM
 
 ;
-;	Two instantiations of cast_diamond are assembled, one that generates the correct bit
-;	patterns for even rows and one for odds. Different bit patterns are used for
-;	alternate rows in order slightly to reduce costs in tile output.
+;	I've kept two labels for cast_diamond, one for even rows and one for odds
+;	because in a previous implementation different bit patters were used for
+;	for even rows and for odds in order to reduce costs in tile output.
 ;
-cast_even_diamond:	cast_diamond 0x48	; i.e. a diamond on an even row: rows 0, 2, 4 ...
-cast_odd_diamond:	cast_diamond 0x90	; i.e. a diamond on an odd row: rows 1, 3, 5 ...
+;	This maintains the capacity to move back to that.
+;
+cast_odd_diamond:
+cast_even_diamond:	cast_diamond 0x90
+
 
 ;
 ;	Current map location in the top left of the display.

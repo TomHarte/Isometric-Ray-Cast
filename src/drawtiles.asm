@@ -77,20 +77,21 @@ draw_row:
 	REPT 16, column
 
 		REPT 2, flip
-			; Get and increment the base triangle address.
+			; Get and increment the base triangle address;
 			pop hl
 			inc hl
 			push hl
 
-			; Assemble tile index in a.
-			ld a, (hl)
-
 			; Carry is guaranteed reset here — either because of the
 			; `add a, a` above, or the and ~7 below.
+
+			; Assemble tile index in a.
+			ld a, (hl)
 			rra
 
 			add hl, bc
 			or (hl)
+			rra
 
 			add hl, bc
 			or (hl)
@@ -161,3 +162,4 @@ draw_row:
 
 	pop hl
 	ret
+	
