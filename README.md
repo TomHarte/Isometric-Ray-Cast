@@ -1,6 +1,6 @@
 # Isometric Ray Casting, Ahoy!
 
-A demo of zero-overdraw isometric drawing for the ZX Spectrum currently featuring on the Ant Attack map:
+A demo of zero-overdraw isometric drawing for the ZX Spectrum currently featuring the Ant Attack map:
 
 ![Sample scrolling](READMEImages/isoscroll.gif)
 
@@ -12,7 +12,7 @@ At just larger than the window in Ant Attack: 26 fps.
 
 Memory usage:
 * 16kb for the map, exactly like Ant Attack;
-* the full screen of 6,912 is used;
+* the full screen of 6,912 bytes is used; and
 * at 32x14, a further 7,578 bytes is used for tables and all existing code; at 32x24 this grows to 9,478 bytes.
 
 Therefore on a 48kb Spectrum there remains around 16kb of space for other graphics and game code at 32x24. If further space were needed then the above spends about 2kb on unrolling the final 2d output stage, for a saving of only of the order of 10,000 cycles. That could be reclaimed.
@@ -31,18 +31,18 @@ I also observed that the colour for each triangle can be selected using a front-
 
 Specifically, for each pair of triangles that join on a vertical edge, start at the top of the level and while either side remains uncoloured:
 
-1. if there is a cube at this position in the grid, paint both the top-of-cube colour;
-2. otherwise if there is a cube at the same level one column that is one column to the left in screen space, paint the left with the right-surface colour;
-3. similarly, if there is a cube at the same level one column to the right in screen space, paint the right with the left-surface colour;
-4. failing all of that, if there is a cube at the same level but directly behind in screen space, paint the left with the left-surface colour and the right with the right-surface colour.
+1. if there is a cube at this position in the grid, paint both with the top-of-cube colour;
+2. otherwise if there is a cube at the same elevation and one column to the left in screen space, paint the left with the right-surface colour;
+3. similarly, if there is a cube at the same elevation and one column to the right in screen space, paint the right with the left-surface colour;
+4. failing all of that, if there is a cube at the same elevation but directly behind in screen space, paint the left with the left-surface colour and the right with the right-surface colour.
 
-Which is casting a ray from front to back for each triangle that needs to be coloured.
+Then if necessary proceed one cube down and one column back in screen space and continue. Which is casting a ray from front to back for each triangle that needs to be coloured.
 
-Furthermore, since the grid is completely fixed, the actual pixel plotting can be done by simple image lookup. No need for doing any triangle rasterisation at runtime.
+Furthermore, since the grid is completely fixed, the actual pixel plotting can be done by simple image lookup. No need for triangle rasterisation at runtime.
 
 # Controversial?
 
-My further assertion that this algorithm was simple enough for a ZX Spectrum seemed to cause controversy. Specifically I was told the following:
+My further assertion that this algorithm was simple enough for a ZX Spectrum seemed to cause controversy. I was told the following:
 
 > That's how voxel-based games on PCs work, but the Spectrum doesn't have the processing power to work like that. 
 
@@ -56,7 +56,7 @@ I stated that I wasn't the most competent Z80 programmer, and it was logically i
 >
 > ... each of your steps through the map goes through a seemingly endless set of nested if/else conditions when it would be far, far faster to simply draw the block over whatever's there and move on.
 
-This project then is an attempt to demonstrate workability on a ZX Spectrum.
+In response this project demonstrates workability on a ZX Spectrum.
 
 It doesn't seek to be a complete game engine, or a complete game, because I have none in mind. It's purely an attempt to translate this approach into Z80 code for better evaluation.
 
@@ -64,7 +64,7 @@ It doesn't seek to be a complete game engine, or a complete game, because I have
 
 In Ant Attack the cube at (x, y, z) is represented by bit z at (x, y) in the internal map.
 
-I'm going to swizzle that: the cube at (x, y, z) is now represented by bit z at (x + z, y + z) in the internal map. So all original 3d data is present, and the ray casting algorithm as above is in use but the per-diamond code becomes as simple as:
+This project swizzles that: the cube at (x, y, z) is now represented by bit z at (x + z, y + z). So all original 3d data is present, and the ray casting algorithm as above is in use but the per-diamond code becomes as simple as:
 
 	const uint8_t front = highest(swizzle(x, y));
 	const uint8_t left = highest(swizzle(x-1, y));
@@ -88,8 +88,8 @@ I'm going to swizzle that: the cube at (x, y, z) is now represented by bit z at 
 		}
 	}
 
-... and then the corresponding equivalent to pick right_colour with `front`, `back` and `right`. That's with `highest` being a function that returns an int with only the highest bit still set. Or returns the number of the highest bit set. Either way. Anything that allows those `>=`s to do the comparison of "which of these has the highest bit set?".
+... plus the equivalent to pick right_colour with `front`, `back` and `right`.
 
-(Aside: you could flip bit order and test for lowest, with the advantage that `x & ~x+1` does the job of `lowest`, but that's still not as fast as a small lookup table so it's slightly academic for now.)
+`highest` is a function that returns an int with only the highest bit of the original set.
 
 Results from that are stored in a 32x49 array, from which values are then picked in threes to select 8x8 graphics tiles which are copied to the display.
